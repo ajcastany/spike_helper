@@ -1,0 +1,98 @@
+* Neuronal Spikes Sorting
+ Spikes are the action potential as measure outside of the brain cell.
+ With code from: [[https://github.com/Zoe0793][Zoe]]
+
+** Load recording.
+ The format of the recording is in `.dat`.  The recordign file contains N channels x M samples in 16 bit intergers.
+ Naming convention:
+ #+begin_quote
+ ch[n]_samp[m]
+ #+end_quote
+
+ #+begin_src python
+   import spikeinterface.full as si
+   import spikeinterface.extractors as se
+   import spikeinterface.sorters as ss
+   import spikeinterface.comparison as sc
+   import spikeinterface.widgets as sw
+ #+end_src
+
+ #+begin_src python
+   file_path = './data/continous.dat'
+   sampling_frequency = float(25000)
+   num_chan = 128
+   data_type = int
+   #gain_to_uV = 0.0000001907
+   recording = si.BinaryRecordingExtractor(file_paths,
+                               sampling_frequency,
+                               num_chan,
+                               dtype,
+                               t_starts=None,
+                               channel_ids=None,
+                               time_axis=0,
+                               file_offset=0,
+                               gain_to_uV=0.0000001907,
+                               offset_to_uV=None,
+                               is_filtered=None)
+
+   print(recording) #check it works
+ #+end_src
+
+** Preprocessing steps
+Can be processed instead on other software.
+
+*** Hi-Pass filtering
+#+begin_src python
+      recording_band_filter = si.bandpass_filter(recording,
+                                                 freq_min=300,
+                                                 freq_max=6000)
+
+#+end_src
+
+*** Common reference
+
+#+begin_src python
+  recording_cmr = si.common_reference(recording_f,
+                                      reference='global',
+                                      operator='median')
+#+end_src
+
+*** Save to disk
+
+#+begin_src python
+  recording_preprocessed = recoding_cmr.save(format='binary',
+                                                n_jobs=1)
+#+end_src
+
+** Recreate and load a Probe Map
+List of x, y coordinates for recording sites for 128 channels.
+
+#+begin_src python
+  # imports
+  from probeinterface import Probe, ProbeGroup
+  from probeinterface import generate_linear_probe, generate_multi_shank
+  from probeinterface import combine_probes
+  from probeinterface.plotting import plot_probe
+
+  probe = generate_multi_shank(num_shank=32,
+                                     num_columns=2,
+                                     num_contact_per_column=2)
+
+  plot_probe(probe, with_contact_id=True)
+#+end_src
+
+*** Attach Probe Map to recording object
+#+begin_src python
+  probe.set_device_channel_indices(np.arange(128))
+  recording = recording.set_probe(probe)
+#+end_src
+
+** Spike Sorting.
+
+*** Set parameters
+
+*** Run the sorting algorithms
+
+*** Extract Waveforms
+
+** Export to Phy
