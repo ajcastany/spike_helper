@@ -21,12 +21,12 @@ other_params_SC['clustering_max_elts'] = 10000
 sorting_SC = ss.run_spykingcircus(recording=recording_cmr, 
                                   output_folder="spykingcircus_output", 
                                   **other_params_SC)
-
 print(sorting_SC)
 
 we_SC = si.WaveformExtractor.create(recording_cmr, 
                                     sorting_SC, 'waveforms_sc', 
                                     remove_if_exists=True)
+
 we_SC.set_params(ms_before=3., 
                  ms_after=4., 
                  max_spikes_per_unit=500)
@@ -37,12 +37,11 @@ print(we_SC)
 unit_id0_SC = sorting_SC.unit_ids[0]
 
 wavefroms_SC = we_SC.get_waveforms(unit_id0_SC)
-
 print(wavefroms_SC.shape)
 
 template_SC = we_SC.get_template(unit_id0_SC)
-
 print(template_SC.shape)
 
+# Exports to Phy
 export_to_phy(we_SC, './phy_folder_for_SC', remove_if_exists=True,
               compute_pc_features=False, compute_amplitudes=True)
